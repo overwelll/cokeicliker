@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Cookie Clicker FIXED</title>
+
+    <style>
+        body{
+        margin:0;
+        font-family:Arial;
+        background:#222;
+        color:white;
+        }
+
+        #top{
+        padding:10px;
+        background:#333;
+        display:flex;
+        justify-content:space-between;
+        }
+
+        #cookie{
+        font-size:200px;
+        cursor:pointer;
+        text-align:center;
+        margin-top:50px;
+        user-select:none;
+        }
+
+        .shopItem{
+        background:#444;
+        padding:10px;
+        margin:5px;
+        cursor:pointer;
+        border-radius:8px;
+        }
+
+        .shopItem:hover{
+        background:#555;
+        }
+
+        .panel{
+        padding:10px;
+        background:#2e2e2e;
+        margin:10px;
+        border-radius:10px;
+        }
+
+        .popup{
+        position:absolute;
+        font-size:20px;
+        color:gold;
+        animation:float 1.5s forwards;
+        pointer-events:none;
+        }
+
+        @keyframes float{
+        0%{transform:translateY(0);opacity:1;}
+        100%{transform:translateY(-80px);opacity:0;}
+        }
+    </style>
+</head>
+
+<body>
+
+<div id="top">
+    <div>
+        <b>Cookies:</b> <span id="cookies">0</span><br>
+        <b>CPS:</b> <span id="cps">0</span>
+    </div>
+
+    <div>
+        Click Power: <span id="clickPower">1</span>
+    </div>
+</div>
+
+<div id="cookie">🍪</div>
+
+<div class="panel">
+    <h2>Shop</h2>
+    <div id="shop"></div>
+</div>
+
+<div class="panel">
+    <h2>Upgrades</h2>
+    <div id="upgrades"></div>
+</div>
+
+<script>
+
+    let cookies = 0;
+let totalCookies = 0;
+let clickPower = 1;
+
+const buildings = [
+{name:"Cursor",cost:15,cps:1,owned:0},
+{name:"Grandma",cost:100,cps:5,owned:0},
+{name:"Farm",cost:500,cps:20,owned:0},
+{name:"Mine",cost:2000,cps:100,owned:0},
+{name:"Factory",cost:10000,cps:500,owned:0}
+];
+
+const upgrades = [
+{name:"Double Click",cost:50,owned:false,effect:2},
+{name:"Super Click",cost:500,owned:false,effect:5},
+{name:"Mega Click",cost:2000,owned:false,effect:10}
+];
+
+function cps(){
+let t = 0;
+for(let b of buildings){
+t += b.cps * b.owned;
+}
+return t;
+}
+
+function update(){
+document.getElementById("cookies").innerText = Math.floor(cookies);
+document.getElementById("cps").innerText = cps();
+document.getElementById("clickPower").innerText = clickPower;
+
+drawShop();
+drawUpgrades();
+}
+    function drawShop(){
+let html = "";
+
+buildings.forEach((b,i)=>{
+html += `
+<div class="shopItem" onclick="buyBuilding(${i})">
+<b>${b.name}</b><br>
+Owned: ${b.owned}<br>
+Cost: ${Math.floor(b.cost)}
+</div>
+`;
+});
+
+document.getElementById("shop").innerHTML = html;
+}
+
+function buyBuilding(i){
+let b = buildings[i];
+
+if(cookies >= b.cost){
+cookies -= b.cost;
+b.owned++;
+b.cost *= 1.15;
+update();
+}
+}
+
+function drawUpgrades(){
+let html = "";
+
+upgrades.forEach((u,i)=>{
+if(!u.owned){
+html += `
+<div class="shopItem" onclick="buyUpgrade(${i})">
+${u.name} - ${u.cost}
+</div>
+`;
+}
+});
+
+document.getElementById("upgrades").innerHTML = html;
+}
+
+function buyUpgrade(i){
+let u = upgrades[i];
+
+if(!u.owned && cookies >= u.cost){
+cookies -= u.cost;
+u.owned = true;
+clickPower *= u.effect;
+update();
+}
+}
+    document.getElementById("cookie").onclick = function(e){
+cookies += clickPower;
+totalCookies += clickPower;
+
+let p = document.createElement("div");
+p.className = "popup";
+p.innerText = "+" + clickPower;
+p.style.left = e.clientX + "px";
+p.style.top = e.clientY + "px";
+document.body.appendChild(p);
+
+setTimeout(()=>p.remove(),1000);
+
+update();
+};
+
+setInterval(()=>{
+cookies += cps()/10;
+totalCookies += cps()/10;
+update();
+},100);
+
+update();
+</script>
+
+</body>
+</html>
